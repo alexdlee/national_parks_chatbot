@@ -17,65 +17,49 @@ def fetch_nearby_places(lat, lon):
 
     response = requests.get(BASE_URL, headers=headers, params=params)
 
-    print(response.text)
     if response.status_code == 200:
-        return response.json()  # Returns places data as a dictionary
-    else:
-        return {"error": f"Failed to fetch parks data: {response.status_code}"}
+        return response.json()["results"]
 
 
 # fetch_nearby_places(44.5979, -110.5612) # sample call
 
 
+import requests
 
-
-def get_fsq_id(query, near=None, lat=None, lon=None):
+def get_fsq_id(park_name, lat, lon):
     """
-    Search for a place by name and return its fsq_id.
+    Fetch the Foursquare ID (fsq_id) for a place using latitude and longitude.
 
     Args:
-        query (str): The name of the location to search for.
-        near (str): An optional city/area to narrow the search.
-        lat (float): Optional latitude of the location.
-        lon (float): Optional longitude of the location.
+        park_name (str): Name of the park (used for debugging purposes).
+        lat (float): Latitude of the park.
+        lon (float): Longitude of the park.
 
     Returns:
-        str: The fsq_id of the location if found, or None.
+        str: Foursquare ID (fsq_id) of the place if found, otherwise None.
     """
     BASE_URL = "https://api.foursquare.com/v3/places/search"
     headers = {
         "Authorization": API_KEY
     }
     params = {
-        "query": query,
-        "limit": 1  # Get only the top result
+        "ll": f"{lat},{lon}",  # Latitude and longitude
+        # "query": park_name,    # Use park name for more accurate results
+        "limit": 1             # Get only the top result
     }
 
-    # Add optional parameters
-    if near:
-        params["near"] = near
-    if lat and lon:
-        params["ll"] = f"{lat},{lon}"
-    
-    # Make the API request
-    response = requests.get(BASE_URL, headers=headers, params=params)
-    
-    if response.status_code == 200:
+    try:
+        response = requests.get(BASE_URL, headers=headers, params=params)
+        response.raise_for_status()  # Raise an exception for HTTP errors
         data = response.json()
+
+        # Check if results are available
         if data["results"]:
-            # Return the fsq_id of the first result
-            return data["results"][0]["fsq_id"]
-        else:
-            print("No results found.")
-            return None
-    else:
-        print(f"Error: {response.status_code}, {response.text}")
+            return data["results"][0]["fsq_id"]  # Return the fsq_id of the first result
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching Foursquare ID for {park_name}: {e}")
         return None
-
-# Example Usage
-fsq_id = get_fsq_id(query="Yellowstone National Park", lat=44.4280, lon=-110.5885)
-# print(f"Foursquare ID: {fsq_id}")
-
 
 
 
@@ -87,14 +71,12 @@ def fetch_place_tips(fsq_id):
     }
 
     params = {
-        "limit": 20
+        "limit": 15
     }
 
     response = requests.get(BASE_URL, headers=headers)
+    if response.status_code == 200:
+        return response.json()
 
-    print(response.text)
-
-
-fetch_place_tips(fsq_id)
 
 

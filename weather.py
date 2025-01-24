@@ -1,30 +1,30 @@
 import requests
+from utils import fetch_lat_lon_with_openweather, format_location_for_openweather
 
 API_KEY = "a92b15c4f52c422e359de572846c8cfb"
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
-def get_current_weather(location):
+def get_current_weather(lat=None, lon=None):
     params = {
-        "lat": -40,      # Latitude (placeholder)
-        "lon": -40,     # Longitude (placeholder)
+        "lat": lat,      # Latitude (placeholder)
+        "lon": lon,     # Longitude (placeholder)
         "appid": API_KEY,     # API Key
-        "units": "metric"     # Use "imperial" for Fahrenheit
+        "units": "imperial"     # Use "imperial" for Fahrenheit
     }
     response = requests.get(BASE_URL, params=params)
-    print(response)
     if response.status_code == 200:
         return response.json()  # Returns weather data as a dictionary
     else:
         return {"error": f"Failed to fetch weather data: {response.status_code}"}
 
 
-def get_uv_index(lat, lon):
+def get_uv_index(lat=None, lon=None):
     BASE_URL = "http://api.openweathermap.org/data/2.5/uvi"
     params = {
-        "lat": -40,
-        "lon": 40,
+        "lat": lat,
+        "lon": lon,
         "appid": API_KEY,
-        "units": "metric" 
+        "units": "imperial" 
     }
     response = requests.get(BASE_URL, params=params)
     if response.status_code == 200:
@@ -33,13 +33,13 @@ def get_uv_index(lat, lon):
         return {"error": f"Failed to fetch UV Index: {response.status_code}"}
     
 
-def get_5day_forecast(location):
+def get_5day_forecast(lat=None, lon=None):
     BASE_URL = "http://api.openweathermap.org/data/2.5/forecast"
     params = {
-       "lat": -40,
-        "lon": 40,
+       "lat": lat,
+        "lon": lon,
         "appid": API_KEY,
-        "units": "metric" 
+        "units": "imperial" 
     }
     response = requests.get(BASE_URL, params=params)
     if response.status_code == 200:
